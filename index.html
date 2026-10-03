@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shortcuts</title>
+<link rel="icon" href="icons/link.svg" type="image/svg+xml">
+<style>
+  :root {
+    --action: #0369a1;
+    --action-hover: #0284c7;
+    --action-50: #f0f9ff;
+    --fg: #27272a;
+    --fg-muted: #52525b;
+    --fg-disabled: #a1a1aa;
+    --surface: #ffffff;
+    --bg: #f1f5f9;
+    --bg-subtle: #f8fafc;
+    --border: #cbd5e1;
+    --border-subtle: #e2e8f0;
+    --border-dashed: #94a3b8;
+    --danger: #b91c1c;
+    --danger-50: #fef2f2;
+    --radius: 4px;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --ring: 0 0 0 2px #fff, 0 0 0 4px var(--action);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  button { font: inherit; }
+  :focus-visible { outline: none; box-shadow: var(--ring); }
+
+  .page { padding: 48px 24px 64px; }
+  .wrap { max-width: 1120px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
+
+  /* Header */
+  .bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; min-height: 44px; }
+  .bar-hint { margin: 0; color: var(--fg-muted); }
+  .bar-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 8px 16px; border-radius: var(--radius); border: 1px solid transparent;
+    font-weight: 600; cursor: pointer; line-height: 1.5;
+  }
+  .btn--primary { background: var(--action); color: #fff; }
+  .btn--primary:hover { background: var(--action-hover); }
+  .btn--secondary { background: var(--surface); color: var(--fg); border-color: var(--border); }
+  .btn--secondary:hover { background: var(--action-50); }
+  .btn-link { background: none; border: 0; padding: 8px 0; color: var(--danger); text-decoration: underline; cursor: pointer; }
+
+  .icon-btn {
+    width: 44px; height: 44px; padding: 0; display: inline-flex; align-items: center; justify-content: center;
+    border: 0; background: transparent; color: var(--fg-muted); border-radius: var(--radius); cursor: pointer;
+  }
+  .icon-btn:hover { color: var(--action); background: var(--action-50); }
+  .icon-btn:disabled { color: var(--fg-disabled); background: transparent; cursor: not-allowed; }
+  .icon-btn--danger:hover { color: var(--danger); background: var(--danger-50); }
+  .icon-btn--boxed { border: 1px solid var(--border); background: var(--surface); box-shadow: var(--shadow-sm); }
+
+  img.i { display: block; object-fit: contain; flex-shrink: 0; }
+  svg.i { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+
+  /* Grid */
+  .tiles { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
+  @media (max-width: 960px) { .tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (max-width: 600px) { .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+  .tile {
+    display: flex; flex-direction: column; gap: 12px; padding: 16px; min-height: 112px; min-width: 0;
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow-sm); color: var(--fg); text-decoration: none;
+  }
+  a.tile:hover { border-color: var(--action); }
+  .tile-icon {
+    width: 52px; height: 52px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+    border-radius: var(--radius); background: var(--action-50); color: var(--action);
+  }
+  .tile-title { font-size: 15px; font-weight: 600; line-height: 1.25; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+
+  /* Edit mode tile */
+  .tile--edit { padding: 0; gap: 0; border-style: dashed; border-color: var(--border-dashed); box-shadow: none; cursor: grab; }
+  .tile--edit .tile-body { flex-grow: 1; display: flex; align-items: center; gap: 12px; padding: 12px; }
+  .tile--edit .tile-title { flex-grow: 1; }
+  .tile--edit .tile-tools { display: flex; justify-content: space-between; border-top: 1px solid var(--border-subtle); padding: 0 4px; }
+  .tile--edit .tile-tools { flex-wrap: wrap; }
+  .tile--edit .tile-tools > div { display: flex; }
+  .tile--edit .tile-tools > div:last-child { margin-left: auto; }
+  .tile--dragging { opacity: .45; }
+  .tile--over { border-color: var(--action); background: var(--action-50); }
+
+  .add-tile {
+    min-height: 112px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+    border: 1px dashed var(--border-dashed); border-radius: var(--radius); background: transparent;
+    color: var(--fg-muted); font-weight: 600; cursor: pointer;
+  }
+  .add-tile:hover { border-color: var(--action); color: var(--action); background: var(--action-50); }
+
+  .empty {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 32px; text-align: center; display: flex; flex-direction: column; gap: 8px;
+  }
+  .empty p { margin: 0; color: var(--fg-muted); }
+  .empty .fallback { font-style: italic; color: #71717a; }
+
+  /* Dialog */
+  dialog {
+    width: calc(100% - 32px); max-width: 480px; padding: 0; border: 1px solid var(--border);
+    border-radius: var(--radius); background: var(--surface); color: var(--fg);
+  }
+  dialog::backdrop { background: rgb(15 23 42 / 0.5); }
+  .dlg-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 16px 16px 32px; border-bottom: 1px solid var(--border-subtle); }
+  .dlg-head h2 { margin: 0; font-size: 20px; line-height: 1.25; font-weight: 600; }
+  .dlg-body { display: flex; flex-direction: column; gap: 16px; padding: 24px 32px; }
+  .field-row { display: flex; flex-direction: column; gap: 4px; }
+  .field-row label, legend { font-weight: 600; }
+  .field {
+    font: inherit; padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius); color: var(--fg);
+  }
+  .field:focus { border-color: var(--action); }
+  fieldset { margin: 0; padding: 0; border: 0; }
+  legend { padding: 0; margin-bottom: 8px; }
+  .picker { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
+  .pick {
+    height: 44px; display: flex; align-items: center; justify-content: center; padding: 0;
+    border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--fg-muted); cursor: pointer;
+  }
+  .pick:hover { color: var(--action); border-color: var(--action); }
+  .pick img { filter: grayscale(1); opacity: .6; }
+  .pick:hover img, .pick[aria-pressed="true"] img { filter: none; opacity: 1; }
+  .pick[aria-pressed="true"] { border-color: var(--action); background: var(--action-50); color: var(--action); }
+  .error { margin: 0; color: var(--danger); }
+  .dlg-foot {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px;
+    padding: 16px 32px; border-top: 1px solid var(--border-subtle); background: var(--bg-subtle);
+  }
+  .dlg-foot .right { display: flex; gap: 8px; margin-left: auto; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main class="page">
+  <div class="wrap">
+    <div class="bar">
+      <p class="bar-hint" id="hint" hidden>Drag cards to reorder them, or use the arrows.</p>
+      <div class="bar-actions">
+        <button type="button" class="icon-btn icon-btn--boxed" id="editBtn" aria-label="Edit shortcuts" title="Edit shortcuts">
+          <svg class="i" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16zM13 7l4 4"/></svg>
+        </button>
+        <button type="button" class="btn btn--secondary" id="addBtn" hidden>Add card</button>
+        <button type="button" class="btn btn--primary" id="doneBtn" hidden>Done</button>
+      </div>
+    </div>
+
+    <div class="empty" id="empty" hidden>
+      <p class="fallback">No shortcuts yet</p>
+      <p>Click the pencil to add your first card.</p>
+    </div>
+
+    <div class="tiles" id="tiles"></div>
+  </div>
+</main>
+
+<dialog id="dlg" aria-labelledby="dlgTitle">
+  <form id="form" method="dialog" novalidate>
+    <div class="dlg-head">
+      <h2 id="dlgTitle">New card</h2>
+      <button type="button" class="icon-btn" id="closeBtn" aria-label="Close">
+        <svg class="i" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="dlg-body">
+      <div class="field-row">
+        <label for="fTitle">Title</label>
+        <input id="fTitle" class="field" type="text" placeholder="e.g. Azure DevOps" autocomplete="off">
+      </div>
+      <div class="field-row">
+        <label for="fUrl">Link</label>
+        <input id="fUrl" class="field" type="text" inputmode="url" placeholder="https://" autocomplete="off">
+      </div>
+      <fieldset>
+        <legend>Icon</legend>
+        <div class="picker" id="picker"></div>
+      </fieldset>
+      <p class="error" id="error" hidden>Add both a title and a link before saving.</p>
+    </div>
+    <div class="dlg-foot">
+      <button type="button" class="btn-link" id="deleteBtn" hidden>Delete card</button>
+      <div class="right">
+        <button type="button" class="btn btn--secondary" id="cancelBtn">Cancel</button>
+        <button type="submit" class="btn btn--primary">Save</button>
+      </div>
+    </div>
+  </form>
+</dialog>
+
+<script src="config.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var STORAGE_KEY = 'jump-page.cards.v1';
+
+  var CONFIG = window.JUMP_CONFIG || {};
+  var ICONS = CONFIG.icons || [];
+  var DEFAULT_CARDS = CONFIG.cards || [];
+
+  var UI = {
+    left: 'M15 6l-6 6 6 6',
+    right: 'M9 6l6 6-6 6',
+    edit: 'M4 20h4L19 9l-4-4L4 16zM13 7l4 4',
+    trash: 'M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v5M14 11v5',
+    grip: 'M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01',
+    plus: 'M12 5v14M5 12h14'
+  };
+
+  // ---------- state ----------
+  var state = {
+    cards: load(),
+    editing: false,
+    draft: null,      // { id|null, title, url, icon }
+    dragId: null
+  };
+
+  function load() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        var parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch (e) { /* storage unavailable: use defaults */ }
+    return DEFAULT_CARDS.slice();
+  }
+  function persist() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state.cards)); } catch (e) { /* ignore */ }
+  }
+
+  // ---------- helpers ----------
+  var $ = function (id) { return document.getElementById(id); };
+  var SVG_NS = 'http://www.w3.org/2000/svg';
+
+  function icon(d, size, extra) {
+    var svg = document.createElementNS(SVG_NS, 'svg');
+    svg.setAttribute('class', 'i');
+    svg.setAttribute('width', size);
+    svg.setAttribute('height', size);
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('aria-hidden', 'true');
+    if (extra) for (var k in extra) svg.setAttribute(k, extra[k]);
+    var p = document.createElementNS(SVG_NS, 'path');
+    p.setAttribute('d', d);
+    svg.appendChild(p);
+    return svg;
+  }
+  function findIcon(id) {
+    for (var i = 0; i < ICONS.length; i++) if (ICONS[i].id === id) return ICONS[i];
+    return ICONS[0];
+  }
+  function iconImg(ic, size) {
+    var img = document.createElement('img');
+    img.className = 'i';
+    img.width = size;
+    img.height = size;
+    img.alt = '';
+    if (ic) img.src = ic.file;
+    return img;
+  }
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text != null) n.textContent = text;
+    return n;
+  }
+  function iconButton(d, label, onClick, extraCls) {
+    var b = el('button', 'icon-btn' + (extraCls ? ' ' + extraCls : ''));
+    b.type = 'button';
+    b.setAttribute('aria-label', label);
+    b.title = label;
+    b.appendChild(icon(d, 18));
+    b.addEventListener('click', function (e) { e.stopPropagation(); onClick(); });
+    return b;
+  }
+  function normUrl(url) {
+    var u = String(url || '').trim();
+    if (!u) return '';
+    return /^[a-z][a-z0-9+.-]*:/i.test(u) ? u : 'https://' + u;
+  }
+  function newId() { return 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+
+  function move(from, to) {
+    if (to < 0 || to >= state.cards.length || from === to) return;
+    var item = state.cards.splice(from, 1)[0];
+    state.cards.splice(to, 0, item);
+    persist();
+    render();
+  }
+  function removeCard(id) {
+    state.cards = state.cards.filter(function (c) { return c.id !== id; });
+    persist();
+    render();
+  }
+
+  // ---------- render ----------
+  function render() {
+    var editing = state.editing;
+    $('hint').hidden = !editing;
+    $('editBtn').hidden = editing;
+    $('addBtn').hidden = !editing;
+    $('doneBtn').hidden = !editing;
+    $('empty').hidden = editing || state.cards.length > 0;
+
+    var grid = $('tiles');
+    grid.textContent = '';
+
+    state.cards.forEach(function (c, i) {
+      grid.appendChild(editing ? editTile(c, i) : viewTile(c));
+    });
+
+    if (editing) {
+      var add = el('button', 'add-tile');
+      add.type = 'button';
+      add.appendChild(icon(UI.plus, 24));
+      add.appendChild(el('span', null, 'Add card'));
+      add.addEventListener('click', openNew);
+      grid.appendChild(add);
+    }
+  }
+
+  function viewTile(c) {
+    var a = el('a', 'tile');
+    a.href = c.url;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.title = c.url;
+    var box = el('span', 'tile-icon');
+    box.appendChild(iconImg(findIcon(c.icon), 32));
+    a.appendChild(box);
+    a.appendChild(el('span', 'tile-title', c.title));
+    return a;
+  }
+
+  function editTile(c, i) {
+    var t = el('div', 'tile tile--edit');
+    t.draggable = true;
+    t.dataset.id = c.id;
+
+    var body = el('div', 'tile-body');
+    var box = el('span', 'tile-icon');
+    box.appendChild(iconImg(findIcon(c.icon), 32));
+    body.appendChild(box);
+    body.appendChild(el('span', 'tile-title', c.title));
+    body.appendChild(icon(UI.grip, 18, { 'stroke-width': '2.5', style: 'color: var(--fg-disabled)' }));
+    t.appendChild(body);
+
+    var tools = el('div', 'tile-tools');
+    var l = el('div'), r = el('div');
+    var bl = iconButton(UI.left, 'Move ' + c.title + ' left', function () { move(i, i - 1); });
+    var br = iconButton(UI.right, 'Move ' + c.title + ' right', function () { move(i, i + 1); });
+    bl.disabled = i === 0;
+    br.disabled = i === state.cards.length - 1;
+    l.appendChild(bl); l.appendChild(br);
+    r.appendChild(iconButton(UI.edit, 'Edit ' + c.title, function () { openEdit(c); }));
+    r.appendChild(iconButton(UI.trash, 'Delete ' + c.title, function () { removeCard(c.id); }, 'icon-btn--danger'));
+    tools.appendChild(l); tools.appendChild(r);
+    t.appendChild(tools);
+
+    // drag & drop
+    t.addEventListener('dragstart', function (e) {
+      state.dragId = c.id;
+      try { e.dataTransfer.setData('text/plain', c.id); e.dataTransfer.effectAllowed = 'move'; } catch (err) {}
+      t.classList.add('tile--dragging');
+    });
+    t.addEventListener('dragend', function () {
+      state.dragId = null;
+      document.querySelectorAll('.tile--over, .tile--dragging').forEach(function (n) {
+        n.classList.remove('tile--over', 'tile--dragging');
+      });
+    });
+    t.addEventListener('dragover', function (e) {
+      if (!state.dragId || state.dragId === c.id) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      t.classList.add('tile--over');
+    });
+    t.addEventListener('dragleave', function () { t.classList.remove('tile--over'); });
+    t.addEventListener('drop', function (e) {
+      e.preventDefault();
+      var from = state.cards.findIndex(function (x) { return x.id === state.dragId; });
+      state.dragId = null;
+      if (from >= 0) move(from, i);
+    });
+    return t;
+  }
+
+  // ---------- dialog ----------
+  var dlg = $('dlg');
+
+  function renderPicker() {
+    var picker = $('picker');
+    picker.textContent = '';
+    ICONS.forEach(function (ic) {
+      var b = el('button', 'pick');
+      b.type = 'button';
+      b.setAttribute('aria-label', ic.label);
+      b.title = ic.label;
+      b.setAttribute('aria-pressed', String(state.draft && state.draft.icon === ic.id));
+      b.appendChild(iconImg(ic, 24));
+      b.addEventListener('click', function () {
+        state.draft.icon = ic.id;
+        renderPicker();
+        picker.querySelector('[aria-pressed="true"]').focus();
+      });
+      picker.appendChild(b);
+    });
+  }
+
+  function openDialog(draft) {
+    state.draft = draft;
+    $('dlgTitle').textContent = draft.id ? 'Edit card' : 'New card';
+    $('fTitle').value = draft.title;
+    $('fUrl').value = draft.url;
+    $('error').hidden = true;
+    $('deleteBtn').hidden = !draft.id;
+    renderPicker();
+    dlg.showModal();
+    $('fTitle').focus();
+  }
+  function openNew() { openDialog({ id: null, title: '', url: '', icon: ICONS.length ? ICONS[0].id : '' }); }
+  function openEdit(c) { openDialog({ id: c.id, title: c.title, url: c.url, icon: c.icon }); }
+  function closeDialog() { dlg.close(); state.draft = null; }
+
+  $('form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var title = $('fTitle').value.trim();
+    var url = normUrl($('fUrl').value);
+    if (!title || !url) { $('error').hidden = false; return; }
+    var d = state.draft;
+    var card = { id: d.id || newId(), title: title, url: url, icon: d.icon || (ICONS.length ? ICONS[0].id : '') };
+    if (d.id) {
+      state.cards = state.cards.map(function (x) { return x.id === d.id ? card : x; });
+    } else {
+      state.cards.push(card);
+    }
+    persist();
+    closeDialog();
+    render();
+  });
+  ['fTitle', 'fUrl'].forEach(function (id) {
+    $(id).addEventListener('input', function () { $('error').hidden = true; });
+  });
+  $('closeBtn').addEventListener('click', closeDialog);
+  $('cancelBtn').addEventListener('click', closeDialog);
+  $('deleteBtn').addEventListener('click', function () {
+    var id = state.draft && state.draft.id;
+    closeDialog();
+    if (id) removeCard(id);
+  });
+  dlg.addEventListener('close', function () { state.draft = null; });
+
+  // ---------- header ----------
+  $('editBtn').addEventListener('click', function () { state.editing = true; render(); $('doneBtn').focus(); });
+  $('doneBtn').addEventListener('click', function () { state.editing = false; render(); $('editBtn').focus(); });
+  $('addBtn').addEventListener('click', openNew);
+
+  render();
+})();
+</script>
+</body>
+</html>
