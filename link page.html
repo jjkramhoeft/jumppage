@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Link List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .link-item {
+            width: 100%;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+            box-sizing: border-box;
+        }
+
+        .link-item:hover {
+            transform: translateX(5px);
+        }
+
+        .link-icon {
+            width: 70px;
+            height: 70px;
+            margin-right: 15px;
+            border-radius: 8px;
+            object-fit: contain;
+        }
+
+        .link-title {
+            font-size: 19px;
+            color: #333;
+            text-decoration: none;
+        }
+
+        .link-container {
+            cursor: pointer;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Links will be inserted here by JavaScript -->
+    </div>
+
+    <script>
+        // JSON data included directly in the HTML
+        const links = [
+            {
+                "Title": "DR",
+                "Url": "https://www.dr.dk/nyheder",
+                "Icon": "file://D:/VisualStudioProjects/LinkPage/Icons/dricon.png"
+            },
+            {
+                "Title": "Politiken",
+                "Url": "https://pol.dk",
+                "Icon": "file://D:/VisualStudioProjects/LinkPage/Icons/policon.png"
+            },
+            {
+                "Title": "The Guardian",
+                "Url": "https://www.theguardian.com/international",
+                "Icon": "file://D:/VisualStudioProjects/LinkPage/Icons/guardicon.png"
+            },
+            {
+                "Title": "Information",
+                "Url": "https://www.information.dk/",
+                "Icon": "file://D:/VisualStudioProjects/LinkPage/Icons/informationicon.png"
+            },
+            {
+                "Title": "ABC",
+                "Url": "https://abcnews.go.com/",
+                "Icon": "file://D:/VisualStudioProjects/LinkPage/Icons/abcicon.png"
+            },
+            {
+                "Title": "Videnskab",
+                "Url": "https://videnskab.dk/seneste-nyt/",
+                "Icon": "file://D:/VisualStudioProjects/LinkPage/Icons/videnskab.png"
+            },
+
+            
+            {
+                "Title": "Youtube",
+                "Url": "https://www.youtube.com/feed/subscriptions",
+                "Icon": "file://D:/VisualStudioProjects/LinkPage/Icons/youtubeicon.png"
+            },
+            {
+                "Title": "YT Subs",
+                "Url": "file:///D:/VisualStudioProjects/youtubejumppage/index.html",
+                "Icon": "file://D:/VisualStudioProjects/LinkPage/Icons/youtubesub.png"
+            },
+            {
+                "Title": "Twitter",
+                "Url": "https://x.com/home",
+                "Icon": "file://D:/VisualStudioProjects/LinkPage/Icons/xicon.png"
+            },
+            {
+                "Title": "facebook",
+                "Url": "https://www.facebook.com/",
+                "Icon": "file://D:/VisualStudioProjects/LinkPage/Icons/facebook.png"
+            },
+
+
+            {
+                "Title": "Maps",
+                "Url": "https://www.google.com/maps/@55.713972,12.3637916,12.25z?authuser=0&entry=ttu&g_ep=EgoyMDI1MDEyMi4wIKXMDSoASAFQAw%3D%3D",
+                "Icon": "file://D:/VisualStudioProjects/LinkPage/Icons/mapsicon.png"
+            },
+            {
+                "Title": "Translate",
+                "Url": "https://translate.google.com/?sl=da&tl=en&op=translate",
+                "Icon": "file://D:/VisualStudioProjects/LinkPage/Icons/translateicon.png"
+            },            
+            {
+                "Title": "Google",
+                "Url": "https://google.com",
+                "Icon": "file://D:/VisualStudioProjects/LinkPage/Icons/googleicon.png"
+            },
+            
+            
+
+            {
+                "Title": "Jordskælv",
+                "Url": "https://earthquake.usgs.gov/earthquakes/map/?extent=-86.73823,-192.30469&extent=86.73823,222.53906&range=month&magnitude=significant&listOnlyShown=true&baseLayer=terrain&timeZone=utc&settings=true",
+                "Icon": "file://D:/VisualStudioProjects/LinkPage/Icons/usgsicon.png"
+            },
+            {
+                "Title": "Nordlys",
+                "Url": "https://www.swpc.noaa.gov/",
+                "Icon": "file://D:/VisualStudioProjects/LinkPage/Icons/noaaicon.png"
+            },
+            {
+                "Title": "DMI",
+                "Url": "https://www.dmi.dk/lokation/show/DK/2624906/Albertslund/",
+                "Icon": "file://D:/VisualStudioProjects/LinkPage/Icons/dmi2icon.png"
+            },
+
+            {
+                "Title": "Bibelen",
+                "Url": "https://www.bibelselskabet.dk/brugbibelen/bibelenonline/Joh/1",
+                "Icon": "file://D:/VisualStudioProjects/LinkPage/Icons/bibelsel.png"
+            },
+            {
+                "Title": "Kalender",
+                "Url": "https://calendar.google.com/calendar/u/0/r",
+                "Icon": "file://D:/VisualStudioProjects/LinkPage/Icons/kalender.png"
+            }
+        ];
+
+        // Create link elements
+        const container = document.querySelector('.container');
+        
+        links.forEach(link => {
+            const linkElement = document.createElement('div');
+            linkElement.className = 'link-item';
+            linkElement.innerHTML = `
+                <a href="${link.Url}" target="_blank" class="link-container">
+                    <img src="${link.Icon}" alt="${link.Title}" class="link-icon">
+                    <span class="link-title">${link.Title}</span>
+                </a>
+            `;
+            container.appendChild(linkElement);
+        });
+    </script>
+</body>
+</html>
