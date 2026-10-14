@@ -85,6 +85,7 @@
     width: 52px; height: 52px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
     border-radius: var(--radius); background: var(--action-50); color: var(--action);
   }
+  .tile-icon--logo { background: transparent; }
   .tile-title { font-size: 15px; font-weight: 600; line-height: 1.25; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
 
   /* Edit mode tile */
@@ -208,7 +209,7 @@
 (function () {
   'use strict';
 
-  var STORAGE_KEY = 'jump-page.cards.v1';
+  var STORAGE_KEY = 'jump-page.cards.v2';
 
   var CONFIG = window.JUMP_CONFIG || {};
   var ICONS = CONFIG.icons || [];
@@ -274,6 +275,13 @@
     img.alt = '';
     if (ic) img.src = ic.file;
     return img;
+  }
+  // Line-art SVGs sit in a tinted box; logos (PNG etc.) bring their own background.
+  function tileIcon(ic) {
+    var isLogo = ic && !/\.svg$/i.test(ic.file);
+    var box = el('span', 'tile-icon' + (isLogo ? ' tile-icon--logo' : ''));
+    box.appendChild(iconImg(ic, isLogo ? 44 : 32));
+    return box;
   }
   function el(tag, cls, text) {
     var n = document.createElement(tag);
@@ -342,8 +350,7 @@
     a.target = '_blank';
     a.rel = 'noopener noreferrer';
     a.title = c.url;
-    var box = el('span', 'tile-icon');
-    box.appendChild(iconImg(findIcon(c.icon), 32));
+    var box = tileIcon(findIcon(c.icon));
     a.appendChild(box);
     a.appendChild(el('span', 'tile-title', c.title));
     return a;
@@ -355,8 +362,7 @@
     t.dataset.id = c.id;
 
     var body = el('div', 'tile-body');
-    var box = el('span', 'tile-icon');
-    box.appendChild(iconImg(findIcon(c.icon), 32));
+    var box = tileIcon(findIcon(c.icon));
     body.appendChild(box);
     body.appendChild(el('span', 'tile-title', c.title));
     body.appendChild(icon(UI.grip, 18, { 'stroke-width': '2.5', style: 'color: var(--fg-disabled)' }));
