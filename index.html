@@ -284,9 +284,9 @@
     if (ic) img.src = ic.file;
     return img;
   }
-  // Line-art SVGs sit in a tinted box; logos (PNG etc.) bring their own background.
+  // Line-art SVGs sit in a tinted box; logos (PNG etc., or marked logo: true) bring their own background.
   function tileIcon(ic) {
-    var isLogo = ic && !/\.svg$/i.test(ic.file);
+    var isLogo = ic && (ic.logo || !/\.svg$/i.test(ic.file));
     var box = el('span', 'tile-icon' + (isLogo ? ' tile-icon--logo' : ''));
     box.appendChild(iconImg(ic, isLogo ? 44 : 32));
     return box;

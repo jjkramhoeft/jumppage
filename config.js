@@ -2,7 +2,8 @@
 //
 // icons: every icon the picker offers. To add one, drop an image (.svg, .png,
 // .webp, ...) into the icons/ folder and add a line here. The id is what cards
-// refer to, so don't rename an id once cards use it.
+// refer to, so don't rename an id once cards use it. SVGs are shown as
+// line-art in a tinted box; add logo: true for an SVG that is a colored logo.
 //
 // cards: the shortcuts a first-time visitor sees. Changes made with the pencil
 // button are saved in that visitor's browser and take precedence over these.
@@ -25,6 +26,7 @@ window.JUMP_CONFIG = {
     { id: 'dmi',         label: 'DMI',              file: 'icons/dmi2icon.png' },
     { id: 'bibelen',     label: 'Bibelen',          file: 'icons/bibelsel.png' },
     { id: 'kalender',    label: 'Google Calendar',  file: 'icons/kalender.png' },
+    { id: 'github',      label: 'GitHub',           file: 'icons/github.svg', logo: true },
 
     { id: 'link',     label: 'Link',     file: 'icons/link.svg' },
     { id: 'globe',    label: 'Web',      file: 'icons/globe.svg' },
