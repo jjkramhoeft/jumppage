@@ -38,13 +38,16 @@
   button { font: inherit; }
   :focus-visible { outline: none; box-shadow: var(--ring); }
 
-  .page { padding: 48px 24px 64px; }
+  .page { padding: 48px 24px 96px; }
   .wrap { max-width: 1120px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
 
   /* Header */
   .bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; min-height: 44px; }
   .bar-hint { margin: 0; color: var(--fg-muted); }
-  .bar-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+  .fab { position: fixed; right: 24px; bottom: 24px; z-index: 10; }
+  .bar-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 8px; margin-left: auto; }
+  .bar-status { margin: 0; color: var(--fg-muted); }
+  .bar-status--error { color: var(--danger); }
 
   /* Buttons */
   .btn {
@@ -151,12 +154,13 @@
 <body>
 <main class="page">
   <div class="wrap">
-    <div class="bar">
+    <div class="bar" id="bar" hidden>
       <p class="bar-hint" id="hint" hidden>Drag cards to reorder them, or use the arrows.</p>
       <div class="bar-actions">
-        <button type="button" class="icon-btn icon-btn--boxed" id="editBtn" aria-label="Edit shortcuts" title="Edit shortcuts">
-          <svg class="i" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16zM13 7l4 4"/></svg>
-        </button>
+        <p class="bar-status" id="status" role="status"></p>
+        <button type="button" class="btn btn--secondary" id="saveSetupBtn" hidden title="Download all cards as a JSON file">Save setup</button>
+        <button type="button" class="btn btn--secondary" id="loadSetupBtn" hidden title="Replace all cards with a saved JSON file">Load setup</button>
+        <input type="file" id="setupFile" accept=".json,application/json" hidden>
         <button type="button" class="btn btn--secondary" id="addBtn" hidden>Add card</button>
         <button type="button" class="btn btn--primary" id="doneBtn" hidden>Done</button>
       </div>
@@ -170,6 +174,10 @@
     <div class="tiles" id="tiles"></div>
   </div>
 </main>
+
+<button type="button" class="icon-btn icon-btn--boxed fab" id="editBtn" aria-label="Edit shortcuts" title="Edit shortcuts">
+  <svg class="i" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16zM13 7l4 4"/></svg>
+</button>
 
 <dialog id="dlg" aria-labelledby="dlgTitle">
   <form id="form" method="dialog" novalidate>
@@ -322,8 +330,12 @@
   function render() {
     var editing = state.editing;
     $('hint').hidden = !editing;
+    $('bar').hidden = !editing;
     $('editBtn').hidden = editing;
     $('addBtn').hidden = !editing;
+    $('saveSetupBtn').hidden = !editing;
+    $('loadSetupBtn').hidden = !editing;
+    if (!editing) setStatus('');
     $('doneBtn').hidden = !editing;
     $('empty').hidden = editing || state.cards.length > 0;
 
@@ -472,6 +484,68 @@
     if (id) removeCard(id);
   });
   dlg.addEventListener('close', function () { state.draft = null; });
+
+  // ---------- save / load setup ----------
+  var SETUP_FORMAT = 'jump-page-setup';
+
+  function setStatus(text, isError) {
+    var s = $('status');
+    s.textContent = text;
+    s.className = 'bar-status' + (isError ? ' bar-status--error' : '');
+  }
+
+  function saveSetup() {
+    var data = { format: SETUP_FORMAT, version: 1, saved: new Date().toISOString(), cards: state.cards };
+    var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'jump-page-setup-' + new Date().toISOString().slice(0, 10) + '.json';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+    setStatus('Saved ' + state.cards.length + ' cards.');
+  }
+
+  // Accepts a saved setup file, or a bare array of cards.
+  function parseSetup(text) {
+    var data = JSON.parse(text);
+    var list = Array.isArray(data) ? data : data && data.cards;
+    if (!Array.isArray(list)) throw new Error('no cards');
+    var seen = {};
+    return list.map(function (c) {
+      if (!c || typeof c.title !== 'string' || typeof c.url !== 'string' || !c.title.trim() || !c.url.trim()) {
+        throw new Error('bad card');
+      }
+      var id = typeof c.id === 'string' && c.id && !seen[c.id] ? c.id : newId();
+      seen[id] = true;
+      return { id: id, title: c.title.trim(), url: normUrl(c.url), icon: typeof c.icon === 'string' ? c.icon : '' };
+    });
+  }
+
+  function loadSetup(file) {
+    var reader = new FileReader();
+    reader.onload = function () {
+      var cards;
+      try { cards = parseSetup(String(reader.result)); }
+      catch (e) { setStatus("That file isn't a valid jump page setup.", true); return; }
+      if (!confirm('Replace your ' + state.cards.length + ' cards with the ' + cards.length + ' cards in "' + file.name + '"?')) return;
+      state.cards = cards;
+      persist();
+      render();
+      setStatus('Loaded ' + cards.length + ' cards.');
+    };
+    reader.onerror = function () { setStatus("Couldn't read that file.", true); };
+    reader.readAsText(file);
+  }
+
+  $('saveSetupBtn').addEventListener('click', saveSetup);
+  $('loadSetupBtn').addEventListener('click', function () { $('setupFile').click(); });
+  $('setupFile').addEventListener('change', function () {
+    var file = this.files && this.files[0];
+    this.value = '';
+    if (file) loadSetup(file);
+  });
 
   // ---------- header ----------
   $('editBtn').addEventListener('click', function () { state.editing = true; render(); $('doneBtn').focus(); });

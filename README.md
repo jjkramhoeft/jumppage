@@ -12,7 +12,8 @@ icons/       icon images
 ## Editing links
 
 - **For everyone:** edit `cards` in `config.js`. Each card is `{ id, title, url, icon }`, where `icon` is an icon id.
-- **Just for you:** click the pencil on the page to add, edit, reorder or delete cards. These changes live in your browser's local storage, so they're per browser and override the defaults in `config.js`. To return to the defaults, clear the site's data in your browser.
+- **Just for you:** click the pencil in the bottom-right corner to add, edit, reorder or delete cards. These changes live in your browser's local storage, so they're per browser and override the defaults in `config.js`. To return to the defaults, clear the site's data in your browser.
+- **Moving to another browser or PC:** in edit mode, click **Save setup** to download your cards as a `.json` file, then open the page on the other machine and click **Load setup** to pick that file. Loading replaces all current cards (you're asked to confirm first).
 
 ## Adding an icon
 
